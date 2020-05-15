@@ -14,6 +14,5 @@ venv.bak/
 pip-selfcheck.json
 *.vscode
 *__pycache__
-docker-compose.yml
 
 # End of https://www.gitignore.io/api/virtualenv,pycharm+iml
