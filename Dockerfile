@@ -1,6 +1,6 @@
 FROM tiangolo/uvicorn-gunicorn-fastapi:python3.7
 
-COPY api /app/app
+COPY app /app/app
 
 ADD requirements.txt requirements.txt
 
