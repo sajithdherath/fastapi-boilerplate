@@ -1,19 +1,21 @@
 import logging
 
 from motor.motor_asyncio import AsyncIOMotorClient
-from .mongodb import db
 from ..config import MONGODB_URL, MAX_CONNECTIONS_COUNT, MIN_CONNECTIONS_COUNT
+from .mongodb import db
+
+logger = logging.getLogger("uvicorn.error")
 
 
 async def connect_to_mongo():
-    logging.info("Mongodb connecting...")
+    logger.info("Connecting to the database...")
     db.client = AsyncIOMotorClient(str(MONGODB_URL),
                                    maxPoolSize=MAX_CONNECTIONS_COUNT,
                                    minPoolSize=MIN_CONNECTIONS_COUNT)
-    logging.info("Mongodb connected！")
+    logger.info("Successfully connected to the database!")
 
 
 async def close_mongo_connection():
-    logging.info("Mongodb connection closing...")
+    logger.info("Closing database connection...")
     db.client.close()
-    logging.info("Mongodb connection closed！")
+    logger.info("Database connection closed！")

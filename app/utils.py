@@ -1,8 +1,20 @@
-from fastapi.encoders import jsonable_encoder
-from pydantic.main import BaseModel
+import logging
+
+from fastapi import HTTPException
 from starlette.responses import JSONResponse
 
+logger = logging.getLogger("uvicorn.error")
 
-def create_aliased_response(model: BaseModel) -> JSONResponse:
-    return JSONResponse(status_code=200,
-                        content=jsonable_encoder(model, by_alias=True))
+
+async def build_response(data, status_code=200):
+    try:
+        return JSONResponse(
+            status_code=status_code,
+            content={
+                'success': True,
+                'payload': data
+            },
+        )
+    except Exception as e:
+        # logger.error(str(e))
+        raise HTTPException(500, detail="json error")

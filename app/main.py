@@ -1,16 +1,15 @@
-import logging
+import uvicorn
 
-import uvicorn as uvicorn
-
-from fastapi import FastAPI
-from starlette.exceptions import HTTPException
+from fastapi import FastAPI,HTTPException
+from fastapi.exceptions import RequestValidationError
 from starlette.middleware.cors import CORSMiddleware
 
 from .db.mongodb_utils import connect_to_mongo, close_mongo_connection
-from .routers import router
+from .api.routes.api import router
 
 from .config import API_PREFIX, VERSION, DEBUG, API_NAME
-from .exceptions import http_exception_handler
+from .api.errors.http_errors import http_error_handler
+from .api.errors.validation_errors import http422_error_handler
 
 app = FastAPI(version=VERSION,
               debug=DEBUG,
@@ -27,12 +26,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-logger = logging.getLogger("app")
 
 app.add_event_handler("startup", connect_to_mongo)
 app.add_event_handler("shutdown", close_mongo_connection)
 
-app.add_exception_handler(HTTPException, http_exception_handler)
+app.add_exception_handler(HTTPException, http_error_handler)
+app.add_exception_handler(RequestValidationError, http422_error_handler)
 
 app.include_router(router, prefix=API_PREFIX)
 

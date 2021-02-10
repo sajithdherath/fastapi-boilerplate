@@ -2,8 +2,10 @@ version: "3"
 
 services:
   api:
-    image: fastapi-boilerplate
+    build: .
     ports:
       - 8000:80
     environment:
-      - DEBUG = True
+      - DEBUG=True
+      - MONGO_HOST=localhost
+      - MONGO_DB=fastapi_boilerplate
