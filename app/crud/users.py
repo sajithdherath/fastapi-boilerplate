@@ -34,7 +34,6 @@ async def update_user(conn: AsyncIOMotorClient, username: str, user: UserInUpdat
 
     dbuser.username = user.username or dbuser.username
     dbuser.email = user.email or dbuser.email
-    dbuser.bio = user.bio or dbuser.bio
     dbuser.image = user.image or dbuser.image
     if user.password:
         dbuser.change_password(user.password)

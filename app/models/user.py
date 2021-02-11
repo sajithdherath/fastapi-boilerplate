@@ -26,7 +26,7 @@ class UserInDB(DBModelMixin, UserBase):
 
 
 class User(UserBase):
-    token: str
+    pass
 
 
 class UserInResponse(RWModel):
