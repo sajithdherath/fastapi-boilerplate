@@ -4,7 +4,8 @@ from fastapi import FastAPI,HTTPException
 from fastapi.exceptions import RequestValidationError
 from starlette.middleware.cors import CORSMiddleware
 
-from .db.mongodb_utils import connect_to_mongo, close_mongo_connection
+from .utils import startup
+from .db.mongodb_utils import close_mongo_connection
 from .api.routes.api import router
 
 from .config import API_PREFIX, VERSION, DEBUG, API_NAME
@@ -27,7 +28,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_event_handler("startup", connect_to_mongo)
+app.add_event_handler("startup", startup)
 app.add_event_handler("shutdown", close_mongo_connection)
 
 app.add_exception_handler(HTTPException, http_error_handler)

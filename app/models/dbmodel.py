@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Schema
+from bson import ObjectId
+from pydantic import BaseModel, Field
 
 
 class DateTimeModelMixin(BaseModel):
@@ -10,4 +11,4 @@ class DateTimeModelMixin(BaseModel):
 
 
 class DBModelMixin(DateTimeModelMixin):
-    id: Optional[int] = None
+    id: Optional[ObjectId] = Field(alias='_id')

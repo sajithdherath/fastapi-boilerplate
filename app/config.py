@@ -10,6 +10,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # one week
 
 config = Config(".env")
 DEBUG: bool = config("DEBUG", cast=bool, default=True)
+# openssl rand -hex 32
 SECRET_KEY = "83cd07fdf2c8311cd4ff3d8b4b9aa6d1c3895bfd6fec1a707dba551b1e021bf4"
 """
 Database Configurations

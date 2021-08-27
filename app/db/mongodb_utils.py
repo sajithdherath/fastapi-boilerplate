@@ -8,11 +8,14 @@ logger = logging.getLogger("uvicorn.error")
 
 
 async def connect_to_mongo():
-    logger.info("Connecting to the database...")
-    db.client = AsyncIOMotorClient(str(MONGODB_URL),
-                                   maxPoolSize=MAX_CONNECTIONS_COUNT,
-                                   minPoolSize=MIN_CONNECTIONS_COUNT)
-    logger.info("Successfully connected to the database!")
+    try:
+        logger.info("Connecting to the database...")
+        db.client = AsyncIOMotorClient(str(MONGODB_URL),
+                                       maxPoolSize=MAX_CONNECTIONS_COUNT,
+                                       minPoolSize=MIN_CONNECTIONS_COUNT)
+        logger.info("Successfully connected to the database!")
+    except ConnectionRefusedError:
+        logger.error("Database connecting failed!")
 
 
 async def close_mongo_connection():
