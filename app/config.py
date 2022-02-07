@@ -1,8 +1,8 @@
 from databases import DatabaseURL
 from starlette.config import Config
 
-API_PREFIX = "/api"
-VERSION = "0.0.0"
+VERSION = "v0.1"
+API_PREFIX = f"/api/{VERSION}"
 API_NAME = "API"
 
 JWT_TOKEN_PREFIX = "Token"

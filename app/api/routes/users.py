@@ -5,7 +5,7 @@ from fastapi.security.oauth2 import OAuth2PasswordBearer
 
 from ...services.jwt import get_current_user
 from ...services.users import check_free_username_and_email
-from ...crud.users import update_user, create_user
+from ...crud.users import update_user, create_user, get_all_users
 from ...db.mongodb import AsyncIOMotorClient, get_database
 from ...models.user import User, UserInResponse, UserInUpdate, UserInCreate
 from ...utils import build_response
@@ -42,3 +42,9 @@ async def update_current_user(user: UserInUpdate,
 
     db_user = await update_user(db, current_user.username, user)
     return await build_response(jsonable_encoder(User(**db_user.dict())))
+
+
+@router.get("")
+async def get_users(db: AsyncIOMotorClient = Depends(get_database)):
+    users = await get_all_users(db)
+    return await build_response(jsonable_encoder(users))

@@ -18,13 +18,9 @@ async def build_response(data, status_code=200):
             },
         )
     except Exception as e:
-        # logger.error(str(e))
+        logger.error(str(e))
         raise HTTPException(500, detail="json error")
 
 
 async def startup():
     await connect_to_mongo()
-    logger = logging.getLogger("uvicorn.error")
-    handler = logging.StreamHandler()
-    handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
-    logger.addHandler(handler)

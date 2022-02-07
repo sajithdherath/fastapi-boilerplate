@@ -1,19 +1,19 @@
-from typing import Optional
+from typing import Optional, List
 
-from pydantic import AnyUrl
+from pydantic import AnyUrl, BaseModel
 
 from .dbmodel import DBModelMixin
 from .rwmodel import RWModel
 from ..services.security import generate_salt, get_password_hash, verify_password
 
 
-class UserBase(RWModel):
+class UserBase(RWModel, DBModelMixin):
     username: str
     email: str
-    image: Optional[AnyUrl] = None
+    profile_picture: Optional[AnyUrl] = None
 
 
-class UserInDB(DBModelMixin, UserBase):
+class UserInDB(UserBase):
     salt: str = ""
     hashed_password: str = ""
 
@@ -47,3 +47,7 @@ class UserInUpdate(RWModel):
     email: Optional[str] = None
     password: Optional[str] = None
     image: Optional[AnyUrl] = None
+
+
+class Users(RWModel, BaseModel):
+    users: List[UserInDB]

@@ -4,7 +4,7 @@ from ..db.mongodb import AsyncIOMotorClient
 from bson.objectid import ObjectId
 
 from ..config import database_name, users_collection
-from ..models.user import UserInCreate, UserInDB, UserInUpdate
+from ..models.user import UserInCreate, UserInDB, UserInUpdate, Users, User
 
 
 async def get_user(conn: AsyncIOMotorClient, username: str) -> UserInDB:
@@ -25,7 +25,6 @@ async def create_user(conn: AsyncIOMotorClient, user: UserInCreate) -> UserInDB:
 
     row = await conn[database_name][users_collection].insert_one(dbuser.dict())
 
-    dbuser.id = row.inserted_id
     return dbuser
 
 
@@ -34,7 +33,7 @@ async def update_user(conn: AsyncIOMotorClient, username: str, user: UserInUpdat
 
     dbuser.username = user.username or dbuser.username
     dbuser.email = user.email or dbuser.email
-    dbuser.image = user.image or dbuser.image
+    dbuser.profile_picture = user.image or dbuser.profile_picture
     if user.password:
         dbuser.change_password(user.password)
 
@@ -42,3 +41,11 @@ async def update_user(conn: AsyncIOMotorClient, username: str, user: UserInUpdat
         .update_one({"username": dbuser.username}, {'$set': dbuser.dict()})
     dbuser.updated_at = updated_at
     return dbuser
+
+
+async def get_all_users(conn: AsyncIOMotorClient) -> Users:
+    users = []
+    rows = conn[database_name][users_collection].find({})
+    async for row in rows:
+        users.append(UserInDB(**row))
+    return Users(users=users)
