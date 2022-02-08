@@ -29,10 +29,6 @@ class User(UserBase):
     pass
 
 
-class UserInResponse(RWModel):
-    user: User
-
-
 class UserInLogin(RWModel):
     email: str
     password: str
@@ -46,8 +42,7 @@ class UserInUpdate(RWModel):
     username: Optional[str] = None
     email: Optional[str] = None
     password: Optional[str] = None
-    image: Optional[AnyUrl] = None
 
 
-class Users(RWModel, BaseModel):
-    users: List[UserInDB]
+class Users(RWModel):
+    users: List[User]

@@ -23,7 +23,7 @@ async def create_user(conn: AsyncIOMotorClient, user: UserInCreate) -> UserInDB:
     dbuser = UserInDB(**user.dict(), created_at=datetime.now(), updated_at=datetime.now())
     dbuser.change_password(user.password)
 
-    row = await conn[database_name][users_collection].insert_one(dbuser.dict())
+    row = await conn[database_name][users_collection].insert_one(dbuser.dict(by_alias=True))
 
     return dbuser
 
@@ -47,5 +47,5 @@ async def get_all_users(conn: AsyncIOMotorClient) -> Users:
     users = []
     rows = conn[database_name][users_collection].find({})
     async for row in rows:
-        users.append(UserInDB(**row))
+        users.append(User(**row))
     return Users(users=users)

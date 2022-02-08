@@ -7,7 +7,7 @@ from ...services.jwt import get_current_user
 from ...services.users import check_free_username_and_email
 from ...crud.users import update_user, create_user, get_all_users
 from ...db.mongodb import AsyncIOMotorClient, get_database
-from ...models.user import User, UserInResponse, UserInUpdate, UserInCreate
+from ...models.user import User, UserInUpdate, UserInCreate
 from ...utils import build_response
 
 router = APIRouter()
@@ -15,7 +15,7 @@ router = APIRouter()
 
 @router.get("/me", tags=["users"])
 async def retrieve_current_user(user: User = Depends(get_current_user)):
-    return await build_response(jsonable_encoder(user))
+    return await build_response(jsonable_encoder(user, by_alias=False))
 
 
 @router.post("", tags=["users"], status_code=HTTP_201_CREATED)
@@ -47,4 +47,4 @@ async def update_current_user(user: UserInUpdate,
 @router.get("")
 async def get_users(db: AsyncIOMotorClient = Depends(get_database)):
     users = await get_all_users(db)
-    return await build_response(jsonable_encoder(users))
+    return await build_response(jsonable_encoder(users, by_alias=False))
