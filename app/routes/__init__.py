@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from .authenticaion import router as auth_router
+from .auth import router as auth_router
 from .users import router as user_router
 from .files import router as files
 from .system import router as system_router

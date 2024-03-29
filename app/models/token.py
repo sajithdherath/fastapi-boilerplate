@@ -1,5 +1,10 @@
-from .rwmodel import RWModel
+from pydantic import BaseModel
 
 
-class TokenPayload(RWModel):
-    username: str = ""
+class TokenPayload(BaseModel):
+    email: str = ""
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "Bearer"

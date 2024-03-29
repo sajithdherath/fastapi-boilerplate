@@ -2,8 +2,6 @@ import uuid
 
 from fastapi import APIRouter, UploadFile, File, Depends
 
-from ...utils import build_response
-
 router = APIRouter()
 
 
@@ -14,4 +12,4 @@ async def create_upload_file(file: UploadFile = File(...)):
     path = f"static/{file_name}.{ext}"
     with open(path, "wb") as f:
         f.write(file.file.read())
-    return await build_response({"file_path": path})
+    return {"file_path": path}

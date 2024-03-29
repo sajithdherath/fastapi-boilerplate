@@ -4,8 +4,20 @@ services:
   api:
     build: .
     ports:
-      - 8000:80
+      - "8000:80"
     environment:
-      - DEBUG=True
-      - MONGO_HOST=localhost
-      - MONGO_DB=fastapi_boilerplate
+      - MONGO_HOST=${MONGO_HOST}
+      - DATABASE=${DATABASE}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:latest
+    volumes:
+      - mongo_volume:/data/db
+
+volumes:
+  mongo_volume:

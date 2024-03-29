@@ -1,12 +1,12 @@
-from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo import MongoClient
 
 
 class DataBase:
-    client: AsyncIOMotorClient = None
+    client: MongoClient = None
 
 
 db = DataBase()
 
 
-async def get_database() -> AsyncIOMotorClient:
+async def get_database() -> MongoClient:
     return db.client

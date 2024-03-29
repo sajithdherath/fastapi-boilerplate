@@ -1,34 +1,64 @@
-import logging
+import string
+from datetime import datetime
+import random
 
-from typing import Optional
 from fastapi import HTTPException
-from starlette.status import (
-    HTTP_403_FORBIDDEN,
-    HTTP_404_NOT_FOUND,
-    HTTP_422_UNPROCESSABLE_ENTITY,
-)
+from pydantic import EmailStr
+from pymongo import MongoClient
 
-from ..crud.users import get_user, get_user_by_email
-from ..db.mongodb import AsyncIOMotorClient
-
-logger = logging.getLogger("uvicorn.error")
+from .email import EmailService
+from .security import get_password_hash
+from ..models.email import EmailSchema
+from ..models.user import UserInCreate, UserInDB, UserInUpdate, User
+from ..repository.users import UserRepository
 
 
-async def check_free_username_and_email(
-        conn: AsyncIOMotorClient, username: Optional[str] = None, email: Optional[str] = None
-):
-    if username:
-        user_by_username = await get_user(conn, username)
-        if user_by_username:
-            logger.error("User already exists")
+class UserService:
+
+    def __init__(self, db: MongoClient):
+        self.repository = UserRepository(db)
+
+    async def create(self, user_in: UserInCreate):
+        user = await self.repository.find(email=user_in.email)
+        if user:
             raise HTTPException(
-                status_code=409,
-                detail="User with this username already exists",
+                status_code=400,
+                detail="The user with this email already exists",
             )
-    if email:
-        user_by_email = await get_user_by_email(conn, email)
-        if user_by_email:
-            raise HTTPException(
-                status_code=409,
-                detail="User with this email already exists",
-            )
+        verification_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        user_hashed = UserInDB(**user_in.dict(),
+                               hashed_password=get_password_hash(user_in.password),
+                               is_active=False,
+                               verification_code=verification_code,
+                               is_deleted=False)
+        user_hashed.created_at = datetime.now()
+        user_hashed.updated_at = datetime.now()
+        user = await self.repository.create(user_hashed.model_dump(exclude_none=True))
+        user_hashed.id = str(user.inserted_id)
+        await self._send_email(user_in.email, verification_code)
+        return user_hashed
+
+    @staticmethod
+    async def _send_email(email: str, verification_code: str):
+        email_service = EmailService()
+        verification_link = f"/verify?code={verification_code}"
+        _ = await email_service.send_email(
+            EmailSchema(email=[email], body={"verification_link": verification_link}))
+
+    async def verify(self, email: EmailStr, code: str):
+        user = await self.repository.find(email=email, verification_code=code)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found or verification code incorrect")
+
+        user = UserInDB(id=str(user["_id"]), **user)
+        user.is_active = True
+        user.updated_at = datetime.now()
+        await self.repository.update(user.id, user.model_dump(exclude={"id"}))
+        return {"message": "Email verified successfully"}
+
+    async def update(self, current_user: User, user: UserInUpdate):
+        user_hashed = UserInDB(**current_user.model_dump(), hashed_password=get_password_hash(user.password))
+        user_hashed.updated_at = datetime.now()
+        user_updated = await self.repository.update(current_user.id,
+                                                    user_hashed.model_dump(exclude_none=True, exclude={"id"}))
+        return User(**user_hashed.model_dump())

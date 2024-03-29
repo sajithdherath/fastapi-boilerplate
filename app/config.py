@@ -1,41 +1,53 @@
-from databases import DatabaseURL
-from starlette.config import Config
+import logging
+from pathlib import Path
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from urllib.parse import quote_plus
 
-VERSION = "v0.1"
-API_PREFIX = f"/api/{VERSION}"
-API_NAME = "API"
+logger = logging.getLogger("uvicorn.error")
 
-config = Config(".env")
-DEBUG: bool = config("DEBUG", cast=bool, default=True)
+class Settings(BaseSettings):
+    # model_config = SettingsConfigDict(env_file='../.env', env_file_encoding='utf-8')
 
-"""
-Security
-"""
-# openssl rand -hex 32
-SECRET_KEY = "83cd07fdf2c8311cd4ff3d8b4b9aa6d1c3895bfd6fec1a707dba551b1e021bf4"
-ALGORITHM = "HS256"
-JWT_TOKEN_PREFIX = "Token"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # one week
+    VERSION: str = "v0.1"
+    API_PREFIX: str = f"/api"
+    API_NAME: str = "API"
+    DEBUG: bool = False
 
-"""
-Database
-"""
-MONGO_HOST: str = config("MONGO_HOST", cast=str, default="localhost")
-MONGO_PORT = config("MONGO_PORT", cast=int, default=27017)
-MONGO_DB = config("MONGO_DB", cast=str, default="fastapi_boilerplate")
-MONGO_USERNAME = config('MONGO_USERNAME', cast=str, default=None)
-MONGO_PASSWORD = config('MONGO_PASSWORD', cast=str, default=None)
-if MONGO_USERNAME is None:
-    MONGODB_URL = DatabaseURL(
-        f"mongodb://{MONGO_HOST}:{MONGO_PORT}/{MONGO_DB}"
-    )
-else:
-    MONGODB_URL = DatabaseURL(
-        f"mongodb://{quote_plus(MONGO_USERNAME)}:{quote_plus(MONGO_PASSWORD)}@{MONGO_HOST}:{MONGO_PORT}"
-    )
-MAX_CONNECTIONS_COUNT: int = config("MAX_CONNECTIONS_COUNT", cast=int, default=10)
-MIN_CONNECTIONS_COUNT: int = config("MIN_CONNECTIONS_COUNT", cast=int, default=10)
+    """
+    Security
+    """
+    # openssl rand -hex 32
+    SECRET_KEY: str = "83cd07fdf2c8311cd4ff3d8b4b9aa6d1c3895bfd6fec1a707dba551b1e021bf4"
+    ALGORITHM: str = "HS256"
+    JWT_TOKEN_PREFIX: str = "Token"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # one week
 
-database_name = MONGO_DB
-users_collection = "users"
+    """
+    Database
+    """
+    MONGO_HOST: str
+    MONGO_PORT: int = 27017
+    DATABASE: str
+    MONGO_USERNAME: str | None = None
+    MONGO_PASSWORD: str | None = None
+
+    users_collection: str = "users"
+    """
+    CORS
+    """
+    ENABLE_CORS: bool = False
+
+    """
+    SMTP
+    """
+    EMAILS_ENABLED: bool = True
+    SMTP_TLS: bool = True
+    SMTP_PORT: int | None = 587
+    SMTP_HOST: str | None = None
+    SMTP_USER: str | None = None
+    SMTP_PASSWORD: str | None = None
+    TEMPLATE_FOLDER: str = str(Path(__file__).parent / 'templates')
+
+
+settings = Settings()

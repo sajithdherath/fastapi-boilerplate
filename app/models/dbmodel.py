@@ -1,8 +1,9 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Any, Union
 
 from bson import ObjectId
 from pydantic import BaseModel, Field, BaseConfig
+from pydantic_core import core_schema
 
 
 class DateTimeModelMixin(BaseModel):
@@ -14,4 +15,4 @@ class DBModelMixin(DateTimeModelMixin):
     class Config(BaseConfig):
         arbitrary_types_allowed = True
 
-    id: ObjectId = Field(default=ObjectId(), alias='_id')
+    id: str | None = None

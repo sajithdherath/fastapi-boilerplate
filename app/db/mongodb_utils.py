@@ -1,7 +1,8 @@
 import logging
+from urllib.parse import quote_plus
 
-from motor.motor_asyncio import AsyncIOMotorClient
-from ..config import MONGODB_URL, MAX_CONNECTIONS_COUNT, MIN_CONNECTIONS_COUNT
+from pymongo import MongoClient
+from ..config import settings
 from .mongodb import db
 
 logger = logging.getLogger("uvicorn.error")
@@ -9,10 +10,15 @@ logger = logging.getLogger("uvicorn.error")
 
 async def connect_to_mongo():
     try:
+        if settings.MONGO_USERNAME is None:
+            mongodb_url: str = f"mongodb://{settings.MONGO_HOST}:{settings.MONGO_PORT}/{settings.DATABASE}"
+
+        else:
+            mongodb_url: str = (f"mongodb://{quote_plus(settings.MONGO_USERNAME)}:{quote_plus(settings.MONGO_PASSWORD)}"
+                                f"@{settings.MONGO_HOST}:{settings.MONGO_PORT}")
         logger.info("Connecting to the database...")
-        db.client = AsyncIOMotorClient(str(MONGODB_URL),
-                                       maxPoolSize=MAX_CONNECTIONS_COUNT,
-                                       minPoolSize=MIN_CONNECTIONS_COUNT)
+        db.client = MongoClient(mongodb_url)
+        db.client.server_info()
         logger.info("Successfully connected to the database!")
     except ConnectionRefusedError:
         logger.error("Database connecting failed!")

@@ -1,48 +1,37 @@
 from typing import Optional, List
 
-from pydantic import AnyUrl, BaseModel
+from pydantic import BaseModel
 
 from .dbmodel import DBModelMixin
-from .rwmodel import RWModel
-from ..services.security import generate_salt, get_password_hash, verify_password
 
 
-class UserBase(RWModel, DBModelMixin):
-    username: str
+class UserBase(DBModelMixin):
     email: str
-    profile_picture: Optional[AnyUrl] = None
+    is_active: bool
+    is_deleted: bool
+    verification_code: str | None = None
 
 
 class UserInDB(UserBase):
-    salt: str = ""
     hashed_password: str = ""
-
-    def check_password(self, password: str):
-        return verify_password(self.salt + password, self.hashed_password)
-
-    def change_password(self, password: str):
-        self.salt = generate_salt()
-        self.hashed_password = get_password_hash(self.salt + password)
 
 
 class User(UserBase):
     pass
 
 
-class UserInLogin(RWModel):
+class UserInCreate(BaseModel):
     email: str
     password: str
 
 
-class UserInCreate(UserInLogin):
-    username: str
+class UserInLogin(UserInCreate):
+    pass
 
 
-class UserInUpdate(RWModel):
-    username: Optional[str] = None
-    email: Optional[str] = None
+class UserInUpdate(DBModelMixin):
     password: Optional[str] = None
 
 
-class Users(RWModel):
+class Users(BaseModel):
     users: List[User]
